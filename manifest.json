@@ -1,1 +1,18 @@
-{\n  "name": "Servipost Delivery - FlotaControl PRO",\n  "short_name": "Servipost",\n  "description": "Sistema de gestión de tiempos, OCR de tickets y rutas optimizadas para flota de reparto Servipost Delivery.",\n  "start_url": "index.html",\n  "display": "standalone",\n  "background_color": "#000000",\n  "theme_color": "#b45309",\n  "orientation": "portrait",\n  "icons": [\n    {\n      "src": "servipost-logo.png",\n      "sizes": "192x192",\n      "type": "image/png",\n      "purpose": "any maskable"\n    },\n    {\n      "src": "servipost-logo.png",\n      "sizes": "512x512",\n      "type": "image/png",\n      "purpose": "any maskable"\n    }\n  ],\n  "categories": ["productivity", "utilities"],\n  "lang": "es-ES"\n}
+{
+  "name": "Servipost Delivery Control",
+  "short_name": "Servipost",
+  "description": "Auditoría de tiempos y rutas para flota Servipost.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#16a34a",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
