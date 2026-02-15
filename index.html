@@ -3,149 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Servipost Delivery - FlotaControl PRO</title>
-    <link rel="icon" type="image/png" href="servipost-logo.png">
-    <link rel="apple-touch-icon" href="servipost-logo.png">
+    <title>Servipost Control</title>
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#b45309">
+    <link rel="apple-touch-icon" href="icon-512.png">
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #f1f5f9; }
+        .card-order { border-left: 5px solid #16a34a; transition: all 0.3s; }
+    </style>
 </head>
-<body class="bg-slate-50 min-h-screen pb-24 font-sans text-slate-900">
+<body class="min-h-screen pb-24">
 
-    <header class="bg-amber-700 text-white p-4 sticky top-0 z-50 shadow-md flex justify-between items-center">
-        <div>
-            <h1 class="font-black italic text-xl">FLOTA CONTROL</h1>
-            <span class="text-[10px] bg-amber-900 px-2 py-0.5 rounded uppercase tracking-wider">Auditoría en Tiempo Real</span>
+    <header class="bg-black text-white p-4 shadow-2xl sticky top-0 z-50 flex justify-between items-center">
+        <div class="flex items-center gap-3">
+            <img src="icon-512.png" class="h-10 w-10 rounded-lg shadow-md border border-gray-800">
+            <div>
+                <h1 class="font-black italic text-sm leading-tight text-green-500">SERVIPOST</h1>
+                <p class="text-[9px] uppercase tracking-widest text-gray-400">Logística de Flota</p>
+            </div>
         </div>
-        <div id="status-gps" class="text-[10px] text-green-300 font-bold">● GPS ACTIVO</div>
+        <div id="counter" class="bg-green-600 px-3 py-1 rounded-full text-xs font-bold">0 Pedidos</div>
     </header>
 
     <main class="p-4 space-y-4">
         
-        <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200">
-            <h2 class="text-xs font-bold text-slate-400 mb-4 uppercase tracking-widest">Paso 1: Identificación</h2>
-            
-            <div class="flex gap-3 mb-4">
-                <input type="text" id="orderId" placeholder="ID Pedido (#823)" class="flex-1 p-4 bg-slate-100 border-none rounded-2xl text-lg font-bold focus:ring-2 focus:ring-amber-500">
-                <label class="bg-slate-800 text-white p-4 rounded-2xl cursor-pointer active:scale-95 transition-transform">
-                    📸 <input type="file" accept="image/*" capture="camera" class="hidden" onchange="previewPhoto(event)">
-                </label>
+        <div class="bg-white p-5 rounded-3xl shadow-sm">
+            <div class="flex gap-2 mb-3">
+                <input type="text" id="orderId" placeholder="# ID Pedido" class="flex-1 text-xl font-bold p-3 bg-gray-50 border rounded-2xl outline-none focus:ring-2 focus:ring-green-500">
+                <button onclick="captureTime('in')" class="bg-indigo-600 text-white px-5 rounded-2xl font-bold active:scale-90 transition">LLEGADA</button>
             </div>
-            
-            <div id="photo-preview" class="hidden mb-4 relative">
-                <img id="img-captured" src="" class="w-full h-32 object-cover rounded-xl border">
-                <span class="absolute top-2 right-2 bg-green-500 text-white text-[10px] px-2 py-1 rounded-full font-bold uppercase shadow-lg">Foto Guardada</span>
-            </div>
-
-            <input type="text" id="address" placeholder="Dirección de entrega" class="w-full p-4 bg-slate-100 border-none rounded-2xl text-sm mb-3">
-            
-            <button onclick="openWaze()" class="w-full bg-blue-50 text-blue-700 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 active:bg-blue-100">
-                🚗 Abrir Navegador GPS
-            </button>
+            <input type="text" id="address" placeholder="Dirección del cliente" class="w-full p-3 bg-gray-50 border rounded-xl text-sm">
         </div>
 
-        <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200">
-            <h2 class="text-xs font-bold text-slate-400 mb-4 uppercase tracking-widest">Paso 2: Tiempos BK</h2>
-            <div class="grid grid-cols-2 gap-3">
-                <button onclick="record('arrival')" id="btn-arrival" class="bg-indigo-600 text-white p-5 rounded-2xl font-black text-sm shadow-lg shadow-indigo-100 active:scale-95">LLEGADA<br>LOCAL</button>
-                <button onclick="record('pickup')" id="btn-pickup" class="bg-emerald-600 text-white p-5 rounded-2xl font-black text-sm shadow-lg shadow-emerald-100 active:scale-95">RECOGIDA<br>PEDIDO</button>
-            </div>
-            <div id="timer-display" class="mt-4 text-center text-slate-500 font-mono text-sm">Esperando inicio...</div>
-        </div>
+        <button onclick="captureTime('out')" class="w-full bg-green-600 text-white py-5 rounded-3xl font-black text-xl shadow-lg active:bg-green-700 transition">
+            RECOGIDA COMPLETADA
+        </button>
 
-        <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200">
-            <h2 class="text-xs font-bold text-slate-400 mb-4 uppercase tracking-widest">Paso 3: Cobro y Cambio</h2>
-            <div class="space-y-3">
-                <div class="flex gap-2">
-                    <input type="number" id="price" placeholder="Precio" class="w-1/2 p-4 bg-slate-100 border-none rounded-2xl font-bold">
-                    <input type="number" id="received" placeholder="Paga con" oninput="calc()" class="w-1/2 p-4 bg-slate-100 border-none rounded-2xl font-bold">
+        <div class="space-y-3">
+            <h2 class="text-xs font-black text-gray-400 uppercase tracking-widest px-2">Historial acumulado</h2>
+            <div id="history" class="space-y-2">
                 </div>
-                <div id="change-display" class="hidden p-4 bg-amber-50 rounded-2xl text-center">
-                    <span class="text-[10px] text-amber-600 font-bold uppercase block">Cambio a devolver</span>
-                    <span id="change-val" class="text-3xl font-black text-amber-700">0.00€</span>
-                </div>
-                <button onclick="logIncident('Falta de cambio en BK')" class="w-full text-[10px] text-slate-400 uppercase font-bold text-center underline">¿BK no te dio cambio?</button>
-            </div>
         </div>
 
     </main>
 
-    <footer class="fixed bottom-0 w-full bg-white border-t border-slate-200 p-4 flex gap-4 shadow-2xl">
-        <button onclick="exportData()" class="flex-1 bg-slate-900 text-white py-4 rounded-2xl font-bold text-xs uppercase tracking-widest active:scale-95">Descargar Reporte</button>
-        <button onclick="location.reload()" class="bg-slate-100 p-4 rounded-2xl active:rotate-180 transition-transform">🔄</button>
+    <footer class="fixed bottom-0 w-full p-4 bg-white/80 backdrop-blur-md border-t flex gap-2">
+        <button onclick="clearAll()" class="flex-1 bg-red-100 text-red-600 py-3 rounded-xl text-xs font-bold uppercase">Limpiar Todo</button>
     </footer>
 
     <script>
-        // Registrar Service Worker para PWA
         if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
 
-        let session = { id: '', addr: '', in: null, out: null, photo: false, incidents: [] };
-        let history = JSON.parse(localStorage.getItem('logs')) || [];
+        let db = JSON.parse(localStorage.getItem('servipost_v1')) || [];
+        let activeOrder = null;
 
-        function previewPhoto(e) {
-            const reader = new FileReader();
-            reader.onload = () => {
-                document.getElementById('img-captured').src = reader.result;
-                document.getElementById('photo-preview').classList.remove('hidden');
-                session.photo = true;
-            };
-            reader.readAsDataURL(e.target.files[0]);
+        function updateUI() {
+            document.getElementById('counter').innerText = `${db.length} Pedidos`;
+            const container = document.getElementById('history');
+            container.innerHTML = db.map((o, i) => `
+                <div class="bg-white p-4 rounded-2xl shadow-sm card-order flex justify-between items-center">
+                    <div>
+                        <p class="font-black text-gray-800 text-lg">${o.id}</p>
+                        <p class="text-[10px] text-gray-500">${o.addr || 'Sin dirección'}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-green-600 font-black text-xl">${o.wait} min</p>
+                        <p class="text-[9px] font-bold text-gray-400 uppercase">${o.timeIn} - ${o.timeOut}</p>
+                    </div>
+                </div>
+            `).reverse().join('');
         }
 
-        function record(type) {
+        function captureTime(type) {
             const id = document.getElementById('orderId').value;
             if(!id) return alert("Escribe el ID del pedido");
             const now = new Date();
+            const timeStr = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
 
-            if(type === 'arrival') {
-                session.id = id;
-                session.addr = document.getElementById('address').value;
-                session.in = now.getTime();
-                document.getElementById('timer-display').innerText = "Llegada: " + now.toLocaleTimeString();
-                document.getElementById('btn-arrival').classList.add('opacity-50');
+            if(type === 'in') {
+                activeOrder = { id: id, in: now.getTime(), timeIn: timeStr, addr: document.getElementById('address').value };
+                alert(`Llegada registrada a las ${timeStr}`);
             } else {
-                if(!session.in) return alert("Primero marca LLEGADA");
-                session.out = now.getTime();
-                const diff = Math.round((session.out - session.in) / 60000);
-                document.getElementById('timer-display').innerText = "¡Listo! Espera de " + diff + " min";
+                if(!activeOrder) return alert("Primero pulsa LLEGADA");
+                const wait = Math.round((now.getTime() - activeOrder.in) / 60000);
                 
-                history.push({ ...session, wait: diff, date: now.toLocaleDateString() });
-                localStorage.setItem('logs', JSON.stringify(history));
-                alert("Pedido guardado en el reporte");
+                db.push({ ...activeOrder, timeOut: timeStr, wait: wait });
+                localStorage.setItem('servipost_v1', JSON.stringify(db));
+                
+                activeOrder = null;
+                document.getElementById('orderId').value = "";
+                document.getElementById('address').value = "";
+                updateUI();
             }
         }
 
-        function calc() {
-            const p = parseFloat(document.getElementById('price').value) || 0;
-            const r = parseFloat(document.getElementById('received').value) || 0;
-            if(r > 0) {
-                document.getElementById('change-display').classList.remove('hidden');
-                document.getElementById('change-val').innerText = (r - p).toFixed(2) + "€";
+        function clearAll() {
+            if(confirm("¿Seguro que quieres borrar todos los datos?")) {
+                db = [];
+                localStorage.removeItem('servipost_v1');
+                updateUI();
             }
         }
 
-        function openWaze() {
-            const addr = document.getElementById('address').value;
-            if(addr) window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addr)}`, '_blank');
-        }
-
-        function logIncident(msg) {
-            session.incidents.push(msg);
-            alert("Incidencia anotada: " + msg);
-        }
-
-        function exportData() {
-            let csv = "ID;Fecha;Entrada;Salida;Espera(Min);Direccion;Incidencias\n";
-            history.forEach(l => {
-                csv += `${l.id};${l.date};${new Date(l.in).toLocaleTimeString()};${new Date(l.out).toLocaleTimeString()};${l.wait};${l.addr};${l.incidents.join("-")}\n`;
-            });
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `auditoria_flota.csv`;
-            a.click();
-        }
+        updateUI();
     </script>
 </body>
 </html>
