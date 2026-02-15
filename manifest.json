@@ -1,12 +1,10 @@
 {
   "name": "Servipost Delivery Control",
   "short_name": "Servipost",
-  "description": "Auditoría de tiempos y rutas para flota Servipost.",
-  "start_url": "./index.html",
+  "start_url": "index.html",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#16a34a",
-  "orientation": "portrait",
   "icons": [
     {
       "src": "icon-512.png",
