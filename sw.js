@@ -1,10 +1,7 @@
-const CACHE_NAME = 'flota-v2';
-const assets = ['./index.html', './manifest.json'];
-
+const CACHE_NAME = 'servipost-v2';
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(assets)));
+  e.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(['./index.html', './manifest.json'])));
 });
-
 self.addEventListener('fetch', e => {
   e.respondWith(caches.match(e.request).then(res => res || fetch(e.request)));
 });
