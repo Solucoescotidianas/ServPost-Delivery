@@ -1,15 +1,1 @@
-{
-  "name": "FlotaControl Auditoría",
-  "short_name": "FlotaControl",
-  "start_url": "index.html",
-  "display": "standalone",
-  "background_color": "#f8fafc",
-  "theme_color": "#b45309",
-  "icons": [
-    {
-      "src": "https://cdn-icons-png.flaticon.com/512/2830/2830305.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
-  ]
-}
+{\n  "name": "Servipost Delivery - FlotaControl PRO",\n  "short_name": "Servipost",\n  "description": "Sistema de gestión de tiempos, OCR de tickets y rutas optimizadas para flota de reparto Servipost Delivery.",\n  "start_url": "index.html",\n  "display": "standalone",\n  "background_color": "#000000",\n  "theme_color": "#b45309",\n  "orientation": "portrait",\n  "icons": [\n    {\n      "src": "servipost-logo.png",\n      "sizes": "192x192",\n      "type": "image/png",\n      "purpose": "any maskable"\n    },\n    {\n      "src": "servipost-logo.png",\n      "sizes": "512x512",\n      "type": "image/png",\n      "purpose": "any maskable"\n    }\n  ],\n  "categories": ["productivity", "utilities"],\n  "lang": "es-ES"\n}
