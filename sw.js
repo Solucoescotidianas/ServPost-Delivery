@@ -1,20 +1,16 @@
-const CACHE_NAME = 'servipost-v4';
+const CACHE_NAME = 'servipost-v5-final';
 const assets = [
   './index.html',
   './manifest.json',
   './icon-512.png'
 ];
 
-// Instalación: Guarda los archivos en la memoria del móvil
 self.addEventListener('install', e => {
   e.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(assets);
-    })
+    caches.open(CACHE_NAME).then(cache => cache.addAll(assets))
   );
 });
 
-// Activación: Limpia cachés antiguas
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys => {
@@ -25,11 +21,8 @@ self.addEventListener('activate', e => {
   );
 });
 
-// Estrategia: Cargar de caché primero, luego red (para modo offline)
 self.addEventListener('fetch', e => {
   e.respondWith(
-    caches.match(e.request).then(res => {
-      return res || fetch(e.request);
-    })
+    caches.match(e.request).then(res => res || fetch(e.request))
   );
 });
