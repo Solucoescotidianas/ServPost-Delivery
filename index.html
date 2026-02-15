@@ -5,26 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Servipost Delivery Control</title>
     <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icon-512.png">
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src='https://unpkg.com/tesseract.js@v2.1.0/dist/tesseract.min.js'></script>
     <style>
         body { background-color: #000; color: #fff; }
         .pedido-card { background: #111; border-left: 4px solid #16a34a; }
-        .status-badge { font-size: 10px; padding: 2px 6px; border-radius: 10px; }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     </style>
 </head>
-<body class="min-h-screen pb-24">
+<body class="min-h-screen pb-32">
 
     <header class="bg-black border-b border-zinc-800 p-4 sticky top-0 z-50 flex justify-between items-center">
         <div class="flex items-center gap-2">
             <img src="icon-512.png" class="h-10 w-10 rounded shadow-lg border border-zinc-700">
             <div>
                 <h1 class="text-green-500 font-black italic text-sm tracking-tighter">SERVIPOST</h1>
-                <p class="text-[9px] text-zinc-500 uppercase font-bold tracking-widest">Control de Flota</p>
+                <p class="text-[9px] text-zinc-500 uppercase font-bold tracking-widest">Calculadora & Tiempos</p>
             </div>
         </div>
-        <div id="gps-indicator" class="text-[9px] text-green-400 animate-pulse font-bold">● GPS ACTIVO</div>
+        <button onclick="shareWhatsApp()" class="bg-green-600 text-[10px] px-3 py-1 rounded-full font-bold">ENVIAR REPORTE</button>
     </header>
 
     <main class="p-4 space-y-6">
@@ -32,132 +30,95 @@
         <div id="active-slots" class="grid grid-cols-1 md:grid-cols-2 gap-4">
             </div>
 
-        <button onclick="addNewOrder()" id="btn-add" class="w-full bg-zinc-900 border-2 border-dashed border-zinc-700 text-zinc-400 py-4 rounded-2xl font-bold flex items-center justify-center gap-2">
+        <button onclick="addNewOrder()" id="btn-add" class="w-full bg-zinc-900 border-2 border-dashed border-zinc-700 text-zinc-400 py-4 rounded-2xl font-bold">
             + Añadir Pedido Simultáneo
         </button>
 
-        <hr class="border-zinc-800">
-
-        <div>
-            <h3 class="text-zinc-500 text-[10px] uppercase font-black tracking-widest mb-3 px-1">Historial de Turno</h3>
-            <div id="history" class="space-y-2"></div>
+        <div id="history" class="space-y-2 mt-8">
+            <h3 class="text-zinc-500 text-[10px] uppercase font-black tracking-widest mb-3">Historial de Hoy</h3>
         </div>
     </main>
 
     <script>
-        let db = JSON.parse(localStorage.getItem('servipost_v2')) || [];
-        let slots = []; // Pedidos activos en pantalla
+        let db = JSON.parse(localStorage.getItem('servipost_v3')) || [];
+        let slots = [];
 
-        // Función para añadir nuevo slot de pedido
         function addNewOrder() {
-            if (slots.length >= 6) return alert("Máximo 6 pedidos simultáneos");
-            
+            if (slots.length >= 6) return alert("Máximo 6 pedidos");
             const id = Date.now();
-            const slot = {
-                uid: id,
-                orderId: '',
-                address: '',
-                timeIn: null,
-                timerInterval: null
-            };
-            slots.push(slot);
+            slots.push({ uid: id, orderId: '', price: 0, received: 0, timeIn: null });
             renderSlots();
         }
 
-        // Renderizado de tarjetas de pedido
         function renderSlots() {
             const container = document.getElementById('active-slots');
             container.innerHTML = slots.map(s => `
-                <div class="pedido-card p-4 rounded-2xl shadow-xl space-y-3">
+                <div class="pedido-card p-4 rounded-3xl shadow-2xl space-y-4">
                     <div class="flex gap-2">
-                        <input type="text" placeholder="# ID" onchange="updateData(${s.uid}, 'orderId', this.value)" class="w-20 bg-zinc-800 p-2 rounded-xl text-sm font-bold text-green-500">
-                        <input type="text" placeholder="Dirección" onchange="updateData(${s.uid}, 'address', this.value)" class="flex-1 bg-zinc-800 p-2 rounded-xl text-xs text-zinc-300">
-                        <button onclick="deleteSlot(${s.uid})" class="text-zinc-600">✕</button>
-                    </div>
-                    
-                    <div class="grid grid-cols-2 gap-2">
-                        <button onclick="captureTime(${s.uid}, 'in')" class="bg-indigo-600 text-white py-3 rounded-xl text-xs font-black uppercase">Llegada BK</button>
-                        <button onclick="captureTime(${s.uid}, 'out')" class="bg-green-600 text-white py-3 rounded-xl text-xs font-black uppercase">Recogida</button>
+                        <input type="text" placeholder="# ID" oninput="updateData(${s.uid}, 'orderId', this.value)" class="w-1/2 bg-zinc-800 p-3 rounded-xl text-lg font-bold text-green-500 outline-none">
+                        <button onclick="deleteSlot(${s.uid})" class="w-1/2 text-zinc-600 text-right pr-2">Cerrar ✕</button>
                     </div>
 
-                    <div class="flex justify-between items-center px-1">
-                        <span id="timer-${s.uid}" class="font-mono text-xs text-zinc-500">00:00</span>
-                        <div class="flex gap-1">
-                            <button onclick="logIncident(${s.uid}, 'Sin Cambio')" class="bg-red-900/30 text-red-400 text-[8px] px-2 py-1 rounded font-bold border border-red-900/50">NO CAMBIO</button>
-                            <button onclick="openMaps('${s.uid}')" class="bg-zinc-800 text-[8px] px-2 py-1 rounded font-bold">MAPS</button>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="captureTime(${s.uid}, 'in')" class="bg-indigo-600 py-3 rounded-xl text-[10px] font-black uppercase">Llegada BK</button>
+                        <button onclick="captureTime(${s.uid}, 'out')" class="bg-green-600 py-3 rounded-xl text-[10px] font-black uppercase">Finalizar</button>
+                    </div>
+
+                    <div class="bg-zinc-900/50 p-3 rounded-2xl border border-zinc-800">
+                        <div class="flex gap-2 mb-2">
+                            <input type="number" placeholder="Coste €" oninput="updateCalc(${s.uid}, 'price', this.value)" class="w-1/2 bg-zinc-800 p-2 rounded-lg text-sm">
+                            <input type="number" placeholder="Paga con €" oninput="updateCalc(${s.uid}, 'received', this.value)" class="w-1/2 bg-zinc-800 p-2 rounded-lg text-sm">
+                        </div>
+                        <div class="text-center">
+                            <span class="text-[10px] text-zinc-500 uppercase font-bold">Cambio a devolver:</span>
+                            <div id="change-${s.uid}" class="text-xl font-black text-amber-500">0.00€</div>
                         </div>
                     </div>
+
+                    <button onclick="logIncident('BK SIN CAMBIO')" class="w-full py-1 border border-red-900/30 text-red-500 text-[8px] font-bold rounded-lg uppercase">⚠️ BK No proporcionó cambio</button>
                 </div>
             `).join('');
-            
-            document.getElementById('btn-add').style.display = slots.length >= 6 ? 'none' : 'flex';
         }
 
-        function updateData(uid, field, value) {
+        function updateCalc(uid, field, value) {
             const slot = slots.find(s => s.uid === uid);
-            if(slot) slot[field] = value;
+            slot[field] = parseFloat(value) || 0;
+            const change = slot.received - slot.price;
+            document.getElementById(`change-${uid}`).innerText = (change > 0 ? change.toFixed(2) : "0.00") + "€";
         }
 
         function captureTime(uid, type) {
             const slot = slots.find(s => s.uid === uid);
-            const now = new Date();
-
-            if(type === 'in') {
-                slot.timeIn = now.getTime();
-                startTimer(uid);
+            if (type === 'in') {
+                slot.timeIn = new Date().getTime();
+                alert("Tiempo de espera iniciado");
             } else {
-                if(!slot.timeIn) return alert("Primero marca LLEGADA");
-                const wait = Math.round((now.getTime() - slot.timeIn) / 60000);
-                
-                // Guardar en DB permanente
-                db.push({
-                    id: slot.orderId || 'S/N',
-                    addr: slot.address,
-                    wait: wait,
-                    time: now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
-                });
-                localStorage.setItem('servipost_v2', JSON.stringify(db));
-                
+                if (!slot.timeIn) return alert("Marca llegada primero");
+                const wait = Math.round((new Date().getTime() - slot.timeIn) / 60000);
+                db.push({ id: slot.orderId, wait: wait, price: slot.price, date: new Date().toLocaleTimeString() });
+                localStorage.setItem('servipost_v3', JSON.stringify(db));
                 deleteSlot(uid);
                 renderHistory();
             }
         }
 
-        function startTimer(uid) {
-            const display = document.getElementById(`timer-${uid}`);
-            setInterval(() => {
-                const slot = slots.find(s => s.uid === uid);
-                if(slot && slot.timeIn) {
-                    const diff = Math.round((Date.now() - slot.timeIn) / 1000);
-                    const mins = Math.floor(diff / 60);
-                    const secs = diff % 60;
-                    display.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-                }
-            }, 1000);
+        function shareWhatsApp() {
+            let text = "*REPORTE SERVIPOST - " + new Date().toLocaleDateString() + "*%0A%0A";
+            db.forEach(o => { text += `Pedido: ${o.id} | Espera: ${o.wait} min | Total: ${o.price}€%0A`; });
+            window.open(`https://wa.me/?text=${text}`);
         }
 
         function renderHistory() {
-            const container = document.getElementById('history');
-            container.innerHTML = db.slice(-10).map(o => `
-                <div class="bg-zinc-900 p-3 rounded-xl flex justify-between items-center border border-zinc-800">
-                    <span class="text-xs font-bold text-zinc-300">${o.id}</span>
-                    <span class="text-xs text-green-500 font-black">${o.wait} min</span>
-                    <span class="text-[9px] text-zinc-600">${o.time}</span>
-                </div>
-            `).reverse().join('');
+            const h = document.getElementById('history');
+            h.innerHTML = '<h3 class="text-zinc-500 text-[10px] uppercase font-black mb-3">Historial</h3>' + 
+            db.slice(-5).map(o => `<div class="bg-zinc-900 p-3 rounded-xl flex justify-between text-xs border border-zinc-800 mb-2"><span>${o.id}</span><span class="text-green-500">${o.wait} min</span></div>`).join('');
         }
 
-        function deleteSlot(uid) {
-            slots = slots.filter(s => s.uid !== uid);
-            renderSlots();
-        }
-
-        function logIncident(uid, type) {
-            alert(`Incidencia registrada: ${type} en pedido actual.`);
-        }
-
+        function deleteSlot(uid) { slots = slots.filter(s => s.uid !== uid); renderSlots(); }
+        function updateData(uid, field, val) { const s = slots.find(x => x.uid === uid); if(s) s[field] = val; }
+        function logIncident(m) { alert("Registrado: " + m); }
+        
         renderHistory();
-        if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
     </script>
 </body>
 </html>
