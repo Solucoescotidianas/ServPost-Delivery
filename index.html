@@ -6,7 +6,7 @@
     <title>SERVIPOST Delivery - Fila Digital</title>
     <style>
         :root { 
-            --servipost-green: #8cc63f; 
+            --servipost-green: #8cc63f; /* Verde aproximado del logo */
             --dark-bg: #0d0d0d;
             --card-bg: #1a1a1a;
             --text-white: #ffffff;
@@ -38,7 +38,7 @@
             border: 1px solid #333;
         }
 
-        label { display: block; margin-bottom: 6px; font-size: 0.85rem; color: #aaa; font-weight: bold; }
+        label { display: block; margin-bottom: 6px; font-size: 0.85rem; color: #aaa; font-weight: bold; text-transform: uppercase;}
 
         select, button { 
             width: 100%; padding: 16px; margin: 8px 0 18px 0; 
@@ -56,6 +56,7 @@
         h3 { 
             color: var(--servipost-green); border-bottom: 1px solid #333; 
             padding-bottom: 12px; margin-top: 0; text-align: center; font-size: 1rem;
+            text-transform: uppercase;
         }
 
         .fila-item { 
@@ -82,12 +83,12 @@
 
     <div class="container">
         <div class="header">
-            <img src="icon-512.png" alt="SERVIPOST">
-            <h2>Gestão de Fila</h2>
+            <img src="icon-512.png" alt="SERVIPOST Delivery">
+            <h2>Gestión de Fila</h2>
         </div>
         
         <div class="card">
-            <label>NOME DO REPARTIDOR:</label>
+            <label>Selecciona tu nombre:</label>
             <select id="repartidor">
                 <option>ALEJANDRO</option><option>ALEX</option><option>ANTONI</option>
                 <option>DARWIN</option><option>DURAN</option><option>FERNANDO</option>
@@ -96,23 +97,24 @@
                 <option>RAUDIEL</option><option>URIEL</option><option>VICENTE</option>
             </select>
 
-            <label>RESTAURANTE / BASE:</label>
+            <label>¿A qué fila entrar?</label>
             <select id="fila_destino">
                 <option value="Burger King">BURGER KING 🍔</option>
                 <option value="Popeyes">POPEYES 🍗</option>
             </select>
 
-            <button class="btn-llegue" onclick="enviar('llegue')">ENTRAR NA FILA</button>
-            <button class="btn-salgo" onclick="enviar('salgo')">SAIR PARA ENTREGA</button>
+            <button class="btn-llegue" onclick="enviar('llegue')">ENTRAR EN FILA</button>
+            <button class="btn-salgo" onclick="enviar('salgo')">SALIR A REPARTO</button>
         </div>
 
         <div class="card">
-            <h3>📋 ORDEM DE VEZ ATUAL</h3>
-            <div id="lista-fila"><div id="loading">Atualizando posições...</div></div>
+            <h3>📋 ORDEN DE TURNO ACTUAL</h3>
+            <div id="lista-fila"><div id="loading">Actualizando posiciones...</div></div>
         </div>
     </div>
 
     <script>
+        // Tu URL de Google Apps Script
         const scriptURL = 'https://script.google.com/macros/s/AKfycbyiPcxG5yKphHH-CNS2g04x905KAt9mpWgi3eb_aS80wMk--1yOUyjxx30-FGHlyVkj0g/exec';
 
         async function cargarFila() {
@@ -123,24 +125,25 @@
                 div.innerHTML = '';
                 
                 if (datos.length === 0) {
-                    div.innerHTML = '<p style="text-align:center;color:#555">Fila vazia no momento.</p>';
+                    div.innerHTML = '<p style="text-align:center;color:#555">Fila vacía por el momento.</p>';
                     return;
                 }
 
                 datos.forEach((item, index) => {
-                    const horaFormateada = new Date(item.hora).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    // Formato de hora local (español)
+                    const horaFormateada = new Date(item.hora).toLocaleTimeString('es-ES', {hour: '2-digit', minute:'2-digit'});
                     div.innerHTML += `
                         <div class="fila-item">
                             <span class="pos">${index + 1}</span>
                             <div class="info">
                                 <span class="nombre">${item.nombre}</span>
-                                <span class="local-tag">${item.fila || 'Geral'}</span>
+                                <span class="local-tag">${item.fila || 'General'}</span>
                             </div>
                             <span class="hora">${horaFormateada}</span>
                         </div>`;
                 });
             } catch (e) {
-                document.getElementById('loading').innerText = "Erro de conexão...";
+                document.getElementById('loading').innerText = "Error de conexión...";
             }
         }
 
@@ -150,30 +153,32 @@
             const btn = event.target;
             const originalText = btn.innerText;
             
-            btn.innerText = "ENVIANDO...";
+            btn.innerText = "PROCESANDO...";
             btn.disabled = true;
 
             try {
                 await fetch(scriptURL, {
                     method: 'POST',
-                    mode: 'no-cors',
+                    mode: 'no-cors', // Necesario para Google Apps Script
                     body: JSON.stringify({nombre, accion, fila})
                 });
                 
+                // Espera un momento para que Google procese y recarga
                 setTimeout(() => {
                     btn.innerText = originalText;
                     btn.disabled = false;
                     cargarFila();
                 }, 1500);
             } catch (e) {
-                alert("Falha ao enviar dados.");
+                alert("Error al enviar datos. Intenta de nuevo.");
                 btn.disabled = false;
                 btn.innerText = originalText;
             }
         }
 
+        // Cargar fila al abrir y cada 20 segundos
         cargarFila();
-        setInterval(cargarFila, 20000); // Atualiza a cada 20 segundos
+        setInterval(cargarFila, 20000); 
     </script>
 </body>
 </html>
