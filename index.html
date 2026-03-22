@@ -3,92 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SERVIPOST Delivery - Fila Digital</title>
+    <title>SERVIPOST - Gestión de Fila</title>
     <style>
-        :root { 
-            --servipost-green: #8cc63f; /* Verde aproximado del logo */
-            --dark-bg: #0d0d0d;
-            --card-bg: #1a1a1a;
-            --text-white: #ffffff;
-            --danger-red: #ff3b3b;
-        }
-        
-        body { 
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
-            background: var(--dark-bg); 
-            color: var(--text-white); 
-            margin: 0; padding: 20px; 
-            display: flex; flex-direction: column; align-items: center; 
-        }
-
+        :root { --verde: #8cc63f; --negro: #0d0d0d; --gris: #1a1a1a; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--negro); color: white; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
         .container { width: 100%; max-width: 420px; }
-
         .header { text-align: center; margin-bottom: 25px; }
-        .header img { max-width: 180px; height: auto; margin-bottom: 10px; }
-        .header h2 { color: var(--servipost-green); font-size: 1.2rem; margin: 0; text-transform: uppercase; letter-spacing: 2px; }
-
-        .card { 
-            background: var(--card-bg); 
-            padding: 20px; 
-            border-radius: 18px; 
-            box-shadow: 0 8px 25px rgba(0,0,0,0.6); 
-            width: 100%; 
-            box-sizing: border-box; 
-            margin-bottom: 20px;
-            border: 1px solid #333;
-        }
-
-        label { display: block; margin-bottom: 6px; font-size: 0.85rem; color: #aaa; font-weight: bold; text-transform: uppercase;}
-
-        select, button { 
-            width: 100%; padding: 16px; margin: 8px 0 18px 0; 
-            border-radius: 12px; border: none; font-size: 1.1rem; 
-            font-weight: bold; cursor: pointer; transition: 0.2s;
-        }
-
+        .header img { max-width: 160px; margin-bottom: 10px; }
+        .card { background: var(--gris); padding: 20px; border-radius: 18px; border: 1px solid #333; margin-bottom: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        label { display: block; margin-bottom: 8px; font-size: 0.8rem; color: var(--verde); font-weight: bold; text-transform: uppercase; }
+        select, button { width: 100%; padding: 16px; margin-bottom: 15px; border-radius: 12px; border: none; font-size: 1rem; font-weight: bold; cursor: pointer; }
         select { background: #2a2a2a; color: white; border: 1px solid #444; appearance: none; }
-
-        .btn-llegue { background: var(--servipost-green); color: #000; }
-        .btn-salgo { background: transparent; color: var(--danger-red); border: 2px solid var(--danger-red); margin-top: 5px; }
-        
-        .btn-llegue:active, .btn-salgo:active { opacity: 0.6; transform: scale(0.97); }
-
-        h3 { 
-            color: var(--servipost-green); border-bottom: 1px solid #333; 
-            padding-bottom: 12px; margin-top: 0; text-align: center; font-size: 1rem;
-            text-transform: uppercase;
-        }
-
-        .fila-item { 
-            display: flex; justify-content: space-between; align-items: center; 
-            padding: 14px 0; border-bottom: 1px solid #2a2a2a; 
-        }
-
-        .pos { 
-            background: var(--servipost-green); color: black; 
-            min-width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
-            border-radius: 8px; font-weight: 900; margin-right: 12px; 
-        }
-
+        .btn-entrar { background: var(--verde); color: black; }
+        .btn-salir { background: transparent; color: #ff4444; border: 2px solid #ff4444; }
+        h3 { color: var(--verde); border-bottom: 1px solid #333; padding-bottom: 10px; text-align: center; font-size: 0.9rem; text-transform: uppercase; }
+        .fila-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #2a2a2a; }
+        .pos { background: var(--verde); color: black; min-width: 25px; height: 25px; display: flex; align-items: center; justify-content: center; border-radius: 6px; font-weight: bold; margin-right: 12px; }
         .info { flex-grow: 1; }
-        .nombre { font-size: 1.1rem; font-weight: 600; display: block; }
-        .local-tag { font-size: 0.7rem; color: #888; text-transform: uppercase; letter-spacing: 1px; }
-
+        .nombre { font-size: 1rem; font-weight: 600; display: block; }
+        .tag { font-size: 0.7rem; color: #888; text-transform: uppercase; }
         .hora { color: #555; font-size: 0.8rem; font-weight: bold; }
-        
-        #loading { text-align: center; color: var(--servipost-green); font-style: italic; padding: 10px; }
     </style>
 </head>
 <body>
 
     <div class="container">
         <div class="header">
-            <img src="icon-512.png" alt="SERVIPOST Delivery">
-            <h2>Gestión de Fila</h2>
+            <img src="icon-512.png" alt="SERVIPOST">
+            <h2 style="color: var(--verde); font-size: 1.2rem; margin:0;">CONTROL DE FILA</h2>
         </div>
         
         <div class="card">
-            <label>Selecciona tu nombre:</label>
+            <label>Repartidor:</label>
             <select id="repartidor">
                 <option>ALEJANDRO</option><option>ALEX</option><option>ANTONI</option>
                 <option>DARWIN</option><option>DURAN</option><option>FERNANDO</option>
@@ -97,24 +43,23 @@
                 <option>RAUDIEL</option><option>URIEL</option><option>VICENTE</option>
             </select>
 
-            <label>¿A qué fila entrar?</label>
+            <label>Establecimiento:</label>
             <select id="fila_destino">
                 <option value="Burger King">BURGER KING 🍔</option>
                 <option value="Popeyes">POPEYES 🍗</option>
             </select>
 
-            <button class="btn-llegue" onclick="enviar('llegue')">ENTRAR EN FILA</button>
-            <button class="btn-salgo" onclick="enviar('salgo')">SALIR A REPARTO</button>
+            <button class="btn-entrar" onclick="enviar('llegue')">ENTRAR EN FILA</button>
+            <button class="btn-salir" onclick="enviar('salgo')">SALIR A REPARTO</button>
         </div>
 
         <div class="card">
-            <h3>📋 ORDEN DE TURNO ACTUAL</h3>
-            <div id="lista-fila"><div id="loading">Actualizando posiciones...</div></div>
+            <h3>📋 ORDEN ACTUAL</h3>
+            <div id="lista-fila" style="text-align:center; color:var(--verde);">Sincronizando...</div>
         </div>
     </div>
 
     <script>
-        // Tu URL de Google Apps Script
         const scriptURL = 'https://script.google.com/macros/s/AKfycbyiPcxG5yKphHH-CNS2g04x905KAt9mpWgi3eb_aS80wMk--1yOUyjxx30-FGHlyVkj0g/exec';
 
         async function cargarFila() {
@@ -122,29 +67,21 @@
                 const response = await fetch(scriptURL);
                 const datos = await response.json();
                 const div = document.getElementById('lista-fila');
-                div.innerHTML = '';
+                div.innerHTML = datos.length === 0 ? '<p style="color:#666">No hay nadie en base.</p>' : '';
                 
-                if (datos.length === 0) {
-                    div.innerHTML = '<p style="text-align:center;color:#555">Fila vacía por el momento.</p>';
-                    return;
-                }
-
                 datos.forEach((item, index) => {
-                    // Formato de hora local (español)
-                    const horaFormateada = new Date(item.hora).toLocaleTimeString('es-ES', {hour: '2-digit', minute:'2-digit'});
+                    const horaF = new Date(item.hora).toLocaleTimeString('es-ES', {hour: '2-digit', minute:'2-digit'});
                     div.innerHTML += `
                         <div class="fila-item">
                             <span class="pos">${index + 1}</span>
                             <div class="info">
                                 <span class="nombre">${item.nombre}</span>
-                                <span class="local-tag">${item.fila || 'General'}</span>
+                                <span class="tag">${item.fila || 'General'}</span>
                             </div>
-                            <span class="hora">${horaFormateada}</span>
+                            <span class="hora">${horaF}</span>
                         </div>`;
                 });
-            } catch (e) {
-                document.getElementById('loading').innerText = "Error de conexión...";
-            }
+            } catch (e) { console.error("Error", e); }
         }
 
         async function enviar(accion) {
@@ -152,33 +89,21 @@
             const fila = document.getElementById('fila_destino').value;
             const btn = event.target;
             const originalText = btn.innerText;
-            
             btn.innerText = "PROCESANDO...";
             btn.disabled = true;
 
             try {
-                await fetch(scriptURL, {
-                    method: 'POST',
-                    mode: 'no-cors', // Necesario para Google Apps Script
-                    body: JSON.stringify({nombre, accion, fila})
-                });
-                
-                // Espera un momento para que Google procese y recarga
+                await fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({nombre, accion, fila}) });
                 setTimeout(() => {
                     btn.innerText = originalText;
                     btn.disabled = false;
                     cargarFila();
                 }, 1500);
-            } catch (e) {
-                alert("Error al enviar datos. Intenta de nuevo.");
-                btn.disabled = false;
-                btn.innerText = originalText;
-            }
+            } catch (e) { alert("Error"); btn.disabled = false; btn.innerText = originalText; }
         }
 
-        // Cargar fila al abrir y cada 20 segundos
         cargarFila();
-        setInterval(cargarFila, 20000); 
+        setInterval(cargarFila, 20000);
     </script>
 </body>
 </html>
