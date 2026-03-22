@@ -1,0 +1,16 @@
+{
+  "short_name": "SERVIPOST",
+  "name": "SERVIPOST Delivery - Gestión de Fila",
+  "icons": [
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "./fila-servipost.html",
+  "display": "standalone",
+  "background_color": "#0d0d0d",
+  "theme_color": "#8cc63f"
+}
