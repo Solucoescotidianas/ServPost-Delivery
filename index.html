@@ -3,47 +3,112 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fila Flota Cáceres</title>
+    <title>SERVIPOST Delivery - Fila Digital</title>
     <style>
-        :root { --bk-orange: #ff8000; --popeyes-red: #e60000; --bg: #121212; --card: #1e1e1e; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        .container { width: 100%; max-width: 400px; }
-        h1 { color: var(--bk-orange); font-size: 1.5rem; text-transform: uppercase; margin-bottom: 20px; }
-        .card { background: var(--card); padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); width: 100%; box-sizing: border-box; margin-bottom: 20px; }
-        select, button { width: 100%; padding: 18px; margin: 10px 0; border-radius: 10px; border: none; font-size: 1.1rem; font-weight: bold; cursor: pointer; }
-        select { background: #333; color: white; }
-        .btn-llegue { background: var(--bk-orange); color: white; }
-        .btn-salgo { background: var(--popeyes-red); color: white; margin-top: 5px; }
-        .btn-llegue:active, .btn-salgo:active { opacity: 0.7; transform: scale(0.98); }
-        h3 { border-bottom: 2px solid #333; padding-bottom: 10px; margin-top: 0; }
-        .fila-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #333; }
-        .pos { background: var(--bk-orange); color: black; padding: 5px 10px; border-radius: 50%; font-weight: bold; margin-right: 15px; }
-        .nombre { flex-grow: 1; font-size: 1.2rem; }
-        .hora { color: #888; font-size: 0.9rem; }
-        #loading { font-style: italic; color: var(--bk-orange); }
+        :root { 
+            --servipost-green: #8cc63f; 
+            --dark-bg: #0d0d0d;
+            --card-bg: #1a1a1a;
+            --text-white: #ffffff;
+            --danger-red: #ff3b3b;
+        }
+        
+        body { 
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            background: var(--dark-bg); 
+            color: var(--text-white); 
+            margin: 0; padding: 20px; 
+            display: flex; flex-direction: column; align-items: center; 
+        }
+
+        .container { width: 100%; max-width: 420px; }
+
+        .header { text-align: center; margin-bottom: 25px; }
+        .header img { max-width: 180px; height: auto; margin-bottom: 10px; }
+        .header h2 { color: var(--servipost-green); font-size: 1.2rem; margin: 0; text-transform: uppercase; letter-spacing: 2px; }
+
+        .card { 
+            background: var(--card-bg); 
+            padding: 20px; 
+            border-radius: 18px; 
+            box-shadow: 0 8px 25px rgba(0,0,0,0.6); 
+            width: 100%; 
+            box-sizing: border-box; 
+            margin-bottom: 20px;
+            border: 1px solid #333;
+        }
+
+        label { display: block; margin-bottom: 6px; font-size: 0.85rem; color: #aaa; font-weight: bold; }
+
+        select, button { 
+            width: 100%; padding: 16px; margin: 8px 0 18px 0; 
+            border-radius: 12px; border: none; font-size: 1.1rem; 
+            font-weight: bold; cursor: pointer; transition: 0.2s;
+        }
+
+        select { background: #2a2a2a; color: white; border: 1px solid #444; appearance: none; }
+
+        .btn-llegue { background: var(--servipost-green); color: #000; }
+        .btn-salgo { background: transparent; color: var(--danger-red); border: 2px solid var(--danger-red); margin-top: 5px; }
+        
+        .btn-llegue:active, .btn-salgo:active { opacity: 0.6; transform: scale(0.97); }
+
+        h3 { 
+            color: var(--servipost-green); border-bottom: 1px solid #333; 
+            padding-bottom: 12px; margin-top: 0; text-align: center; font-size: 1rem;
+        }
+
+        .fila-item { 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 14px 0; border-bottom: 1px solid #2a2a2a; 
+        }
+
+        .pos { 
+            background: var(--servipost-green); color: black; 
+            min-width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
+            border-radius: 8px; font-weight: 900; margin-right: 12px; 
+        }
+
+        .info { flex-grow: 1; }
+        .nombre { font-size: 1.1rem; font-weight: 600; display: block; }
+        .local-tag { font-size: 0.7rem; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+
+        .hora { color: #555; font-size: 0.8rem; font-weight: bold; }
+        
+        #loading { text-align: center; color: var(--servipost-green); font-style: italic; padding: 10px; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>📍 Fila BK / Popeyes</h1>
+        <div class="header">
+            <img src="icon-512.png" alt="SERVIPOST">
+            <h2>Gestão de Fila</h2>
+        </div>
         
         <div class="card">
-            <label>Selecciona tu nombre:</label>
+            <label>NOME DO REPARTIDOR:</label>
             <select id="repartidor">
-                <option>VICENTE</option><option>JOSWIL</option><option>DARWIN</option>
-                <option>OSCAR</option><option>FERNANDO</option><option>JEAN WON</option>
-                <option>JUAN</option><option>ANTONI</option><option>HENRY</option>
-                <option>RAUDIEL</option><option>ALEJANDRO</option><option>URIEL</option>
-                <option>JAIRO</option><option>ALEX</option><option>DURAN</option>
+                <option>ALEJANDRO</option><option>ALEX</option><option>ANTONI</option>
+                <option>DARWIN</option><option>DURAN</option><option>FERNANDO</option>
+                <option>HENRY</option><option>JAIRO</option><option>JEAN WON</option>
+                <option>JOSWIL</option><option>JUAN</option><option>OSCAR</option>
+                <option>RAUDIEL</option><option>URIEL</option><option>VICENTE</option>
             </select>
-            <button class="btn-llegue" onclick="enviar('llegue')">ENTRAR EN FILA</button>
-            <button class="btn-salgo" onclick="enviar('salgo')">SALIR A REPARTO</button>
+
+            <label>RESTAURANTE / BASE:</label>
+            <select id="fila_destino">
+                <option value="Burger King">BURGER KING 🍔</option>
+                <option value="Popeyes">POPEYES 🍗</option>
+            </select>
+
+            <button class="btn-llegue" onclick="enviar('llegue')">ENTRAR NA FILA</button>
+            <button class="btn-salgo" onclick="enviar('salgo')">SAIR PARA ENTREGA</button>
         </div>
 
         <div class="card">
-            <h3>📋 ORDEN DE VEZ</h3>
-            <div id="lista-fila"><span id="loading">Actualizando fila...</span></div>
+            <h3>📋 ORDEM DE VEZ ATUAL</h3>
+            <div id="lista-fila"><div id="loading">Atualizando posições...</div></div>
         </div>
     </div>
 
@@ -58,7 +123,7 @@
                 div.innerHTML = '';
                 
                 if (datos.length === 0) {
-                    div.innerHTML = '<p style="color:#666">No hay nadie en la base.</p>';
+                    div.innerHTML = '<p style="text-align:center;color:#555">Fila vazia no momento.</p>';
                     return;
                 }
 
@@ -67,45 +132,48 @@
                     div.innerHTML += `
                         <div class="fila-item">
                             <span class="pos">${index + 1}</span>
-                            <span class="nombre">${item.nombre}</span>
+                            <div class="info">
+                                <span class="nombre">${item.nombre}</span>
+                                <span class="local-tag">${item.fila || 'Geral'}</span>
+                            </div>
                             <span class="hora">${horaFormateada}</span>
                         </div>`;
                 });
             } catch (e) {
-                document.getElementById('loading').innerText = "Error al conectar.";
+                document.getElementById('loading').innerText = "Erro de conexão...";
             }
         }
 
         async function enviar(accion) {
             const nombre = document.getElementById('repartidor').value;
+            const fila = document.getElementById('fila_destino').value;
             const btn = event.target;
             const originalText = btn.innerText;
             
-            btn.innerText = "PROCESANDO...";
+            btn.innerText = "ENVIANDO...";
             btn.disabled = true;
 
             try {
                 await fetch(scriptURL, {
                     method: 'POST',
-                    mode: 'no-cors', // Necesario para Google Apps Script
-                    body: JSON.stringify({nombre, accion})
+                    mode: 'no-cors',
+                    body: JSON.stringify({nombre, accion, fila})
                 });
-                // Esperamos un segundo para que Google procese y recargamos
+                
                 setTimeout(() => {
                     btn.innerText = originalText;
                     btn.disabled = false;
                     cargarFila();
                 }, 1500);
             } catch (e) {
-                alert("Error al enviar. Intenta de nuevo.");
+                alert("Falha ao enviar dados.");
                 btn.disabled = false;
                 btn.innerText = originalText;
             }
         }
 
-        // Cargar la fila al abrir y cada 30 segundos
         cargarFila();
-        setInterval(cargarFila, 30000);
+        setInterval(cargarFila, 20000); // Atualiza a cada 20 segundos
     </script>
 </body>
 </html>
