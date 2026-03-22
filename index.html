@@ -2,155 +2,110 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Servipost Auditor OCR</title>
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icon-512.png">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src='https://unpkg.com/tesseract.js@v2.1.0/dist/tesseract.min.js'></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fila Flota Cáceres</title>
     <style>
-        body { background-color: #000; color: #fff; font-family: sans-serif; }
-        .pedido-card { background: #111; border-left: 4px solid #16a34a; }
-        .scanning { animation: pulse 1.5s infinite; color: #fbbf24; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        :root { --bk-orange: #ff8000; --popeyes-red: #e60000; --bg: #121212; --card: #1e1e1e; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 100%; max-width: 400px; }
+        h1 { color: var(--bk-orange); font-size: 1.5rem; text-transform: uppercase; margin-bottom: 20px; }
+        .card { background: var(--card); padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); width: 100%; box-sizing: border-box; margin-bottom: 20px; }
+        select, button { width: 100%; padding: 18px; margin: 10px 0; border-radius: 10px; border: none; font-size: 1.1rem; font-weight: bold; cursor: pointer; }
+        select { background: #333; color: white; }
+        .btn-llegue { background: var(--bk-orange); color: white; }
+        .btn-salgo { background: var(--popeyes-red); color: white; margin-top: 5px; }
+        .btn-llegue:active, .btn-salgo:active { opacity: 0.7; transform: scale(0.98); }
+        h3 { border-bottom: 2px solid #333; padding-bottom: 10px; margin-top: 0; }
+        .fila-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #333; }
+        .pos { background: var(--bk-orange); color: black; padding: 5px 10px; border-radius: 50%; font-weight: bold; margin-right: 15px; }
+        .nombre { flex-grow: 1; font-size: 1.2rem; }
+        .hora { color: #888; font-size: 0.9rem; }
+        #loading { font-style: italic; color: var(--bk-orange); }
     </style>
 </head>
-<body class="min-h-screen pb-32">
+<body>
 
-    <header class="bg-black border-b border-zinc-800 p-4 sticky top-0 z-50 flex justify-between items-center">
-        <div class="flex items-center gap-2">
-            <img src="icon-512.png" class="h-10 w-10 rounded shadow-lg border border-zinc-700">
-            <h1 class="text-green-500 font-black italic text-sm">SERVIPOST PRO</h1>
+    <div class="container">
+        <h1>📍 Fila BK / Popeyes</h1>
+        
+        <div class="card">
+            <label>Selecciona tu nombre:</label>
+            <select id="repartidor">
+                <option>VICENTE</option><option>JOSWIL</option><option>DARWIN</option>
+                <option>OSCAR</option><option>FERNANDO</option><option>JEAN WON</option>
+                <option>JUAN</option><option>ANTONI</option><option>HENRY</option>
+                <option>RAUDIEL</option><option>ALEJANDRO</option><option>URIEL</option>
+                <option>JAIRO</option><option>ALEX</option><option>DURAN</option>
+            </select>
+            <button class="btn-llegue" onclick="enviar('llegue')">ENTRAR EN FILA</button>
+            <button class="btn-salgo" onclick="enviar('salgo')">SALIR A REPARTO</button>
         </div>
-        <button onclick="shareWhatsApp()" class="bg-green-600 text-[10px] px-4 py-2 rounded-full font-bold">REPORTE</button>
-    </header>
 
-    <main class="p-4 space-y-4">
-        <div id="active-slots" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-
-        <button onclick="addNewOrder()" id="btn-add" class="w-full bg-zinc-900 border-2 border-dashed border-zinc-800 text-zinc-500 py-4 rounded-3xl font-bold">
-            + Nuevo Pedido (OCR Activo)
-        </button>
-
-        <div id="history-list" class="space-y-2 mt-6"></div>
-    </main>
+        <div class="card">
+            <h3>📋 ORDEN DE VEZ</h3>
+            <div id="lista-fila"><span id="loading">Actualizando fila...</span></div>
+        </div>
+    </div>
 
     <script>
-        let db = JSON.parse(localStorage.getItem('servipost_v5')) || [];
-        let slots = [];
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbyiPcxG5yKphHH-CNS2g04x905KAt9mpWgi3eb_aS80wMk--1yOUyjxx30-FGHlyVkj0g/exec';
 
-        function addNewOrder() {
-            if (slots.length >= 6) return alert("Máximo 6 pedidos");
-            const uid = Date.now();
-            slots.push({ uid, orderId: '', addr: '', timeIn: null, timeExit: null, timeEnd: null, price: 0, received: 0 });
-            renderSlots();
+        async function cargarFila() {
+            try {
+                const response = await fetch(scriptURL);
+                const datos = await response.json();
+                const div = document.getElementById('lista-fila');
+                div.innerHTML = '';
+                
+                if (datos.length === 0) {
+                    div.innerHTML = '<p style="color:#666">No hay nadie en la base.</p>';
+                    return;
+                }
+
+                datos.forEach((item, index) => {
+                    const horaFormateada = new Date(item.hora).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    div.innerHTML += `
+                        <div class="fila-item">
+                            <span class="pos">${index + 1}</span>
+                            <span class="nombre">${item.nombre}</span>
+                            <span class="hora">${horaFormateada}</span>
+                        </div>`;
+                });
+            } catch (e) {
+                document.getElementById('loading').innerText = "Error al conectar.";
+            }
         }
 
-        async function processOCR(event, uid) {
-            const file = event.target.files[0];
-            const statusLabel = document.getElementById(`status-${uid}`);
-            statusLabel.innerText = "Leyendo ticket...";
-            statusLabel.classList.add('scanning');
+        async function enviar(accion) {
+            const nombre = document.getElementById('repartidor').value;
+            const btn = event.target;
+            const originalText = btn.innerText;
+            
+            btn.innerText = "PROCESANDO...";
+            btn.disabled = true;
 
             try {
-                const { data: { text } } = await Tesseract.recognize(file, 'spa');
-                
-                // Buscar ID (Ej: #123 o número de 3-4 cifras)
-                const idMatch = text.match(/#\s?(\d+)/) || text.match(/\d{3,4}/);
-                // Buscar Dirección (Palabras clave comunes en tickets)
-                const addrMatch = text.match(/(Calle|Av|C\/|Plaza|Pje)\s.+/i);
-
-                if (idMatch) {
-                    const id = idMatch[0].replace(/\s/g, '');
-                    document.getElementById(`id-${uid}`).value = id;
-                    updateData(uid, 'orderId', id);
-                }
-                if (addrMatch) {
-                    const addr = addrMatch[0].substring(0, 30);
-                    document.getElementById(`addr-${uid}`).value = addr;
-                    updateData(uid, 'addr', addr);
-                }
-
-                statusLabel.innerText = "Escaneo completado";
-                statusLabel.classList.remove('scanning');
+                await fetch(scriptURL, {
+                    method: 'POST',
+                    mode: 'no-cors', // Necesario para Google Apps Script
+                    body: JSON.stringify({nombre, accion})
+                });
+                // Esperamos un segundo para que Google procese y recargamos
+                setTimeout(() => {
+                    btn.innerText = originalText;
+                    btn.disabled = false;
+                    cargarFila();
+                }, 1500);
             } catch (e) {
-                statusLabel.innerText = "Error OCR - Introduce manual";
-                statusLabel.classList.remove('scanning');
+                alert("Error al enviar. Intenta de nuevo.");
+                btn.disabled = false;
+                btn.innerText = originalText;
             }
         }
 
-        function renderSlots() {
-            const container = document.getElementById('active-slots');
-            container.innerHTML = slots.map(s => `
-                <div class="pedido-card p-4 rounded-3xl shadow-2xl space-y-3">
-                    <div class="flex justify-between items-center">
-                        <span id="status-${s.uid}" class="text-[8px] font-bold text-zinc-500 uppercase">Esperando Foto</span>
-                        <button onclick="deleteSlot(${s.uid})" class="text-zinc-600">✕</button>
-                    </div>
-
-                    <div class="flex gap-2">
-                        <label class="bg-zinc-800 p-3 rounded-2xl cursor-pointer active:bg-zinc-700">
-                            📸 <input type="file" accept="image/*" capture="camera" class="hidden" onchange="processOCR(event, ${s.uid})">
-                        </label>
-                        <input type="text" id="id-${s.uid}" value="${s.orderId}" placeholder="# ID" oninput="updateData(${s.uid}, 'orderId', this.value)" class="flex-1 bg-zinc-800 p-3 rounded-2xl text-lg font-bold text-green-500 outline-none">
-                    </div>
-
-                    <input type="text" id="addr-${s.uid}" value="${s.addr}" placeholder="Dirección detectada" oninput="updateData(${s.uid}, 'addr', this.value)" class="w-full bg-zinc-800 p-2 rounded-xl text-xs text-zinc-400">
-
-                    <div class="grid grid-cols-3 gap-1">
-                        <button onclick="captureTime(${s.uid}, 'in')" class="bg-indigo-600 py-3 rounded-xl text-[9px] font-black uppercase">Llegada</button>
-                        <button onclick="captureTime(${s.uid}, 'exit')" class="bg-amber-600 py-3 rounded-xl text-[9px] font-black uppercase">Reparto</button>
-                        <button onclick="captureTime(${s.uid}, 'end')" class="bg-green-600 py-3 rounded-xl text-[9px] font-black uppercase">Entrega</button>
-                    </div>
-
-                    <div class="bg-zinc-900 p-2 rounded-xl flex gap-2 items-center">
-                        <input type="number" placeholder="Coste" oninput="updateCalc(${s.uid}, 'price', this.value)" class="w-1/2 bg-zinc-800 p-1 rounded text-center text-xs">
-                        <input type="number" placeholder="Paga" oninput="updateCalc(${s.uid}, 'received', this.value)" class="w-1/2 bg-zinc-800 p-1 rounded text-center text-xs">
-                        <span id="change-${s.uid}" class="w-full text-center text-amber-500 font-bold text-sm">0.00€</span>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function captureTime(uid, type) {
-            const s = slots.find(x => x.uid === uid);
-            const now = Date.now();
-            if (type === 'in') s.timeIn = now;
-            else if (type === 'exit') s.timeExit = now;
-            else if (type === 'end') {
-                if (!s.timeExit) return alert("Faltan pasos");
-                const wait = Math.round((s.timeExit - s.timeIn) / 60000);
-                const drive = Math.round((Date.now() - s.timeExit) / 60000);
-                db.push({ id: s.orderId, wait, drive, total: wait+drive, time: new Date().toLocaleTimeString() });
-                localStorage.setItem('servipost_v5', JSON.stringify(db));
-                deleteSlot(uid);
-                renderHistory();
-            }
-        }
-
-        function updateData(uid, field, val) { const s = slots.find(x => x.uid === uid); if(s) s[field] = val; }
-        function updateCalc(uid, field, val) {
-            const s = slots.find(x => x.uid === uid);
-            s[field] = parseFloat(val) || 0;
-            const change = s.received - s.price;
-            document.getElementById(`change-${uid}`).innerText = (change > 0 ? change.toFixed(2) : "0.00") + "€";
-        }
-        function deleteSlot(uid) { slots = slots.filter(s => s.uid !== uid); renderSlots(); }
-        function renderHistory() {
-            document.getElementById('history-list').innerHTML = db.slice(-10).reverse().map(o => `
-                <div class="bg-zinc-900 p-3 rounded-2xl flex justify-between text-[10px] border border-zinc-800">
-                    <span class="font-bold text-green-500">${o.id}</span>
-                    <span>BK: ${o.wait}m | MOTO: ${o.drive}m</span>
-                    <span class="text-zinc-500">${o.time}</span>
-                </div>
-            `).join('');
-        }
-        function shareWhatsApp() {
-            let t = "*SERVIPOST REPORT*%0A";
-            db.forEach(o => t += `${o.id}: BK ${o.wait}m | Moto ${o.drive}m%0A`);
-            window.open(`https://wa.me/?text=${t}`);
-        }
-        renderHistory();
+        // Cargar la fila al abrir y cada 30 segundos
+        cargarFila();
+        setInterval(cargarFila, 30000);
     </script>
 </body>
 </html>
