@@ -81,6 +81,7 @@
         
         .btn-entrar { background: var(--verde); color: black; }
         .btn-salir { background: transparent; color: #ff4444; border: 2px solid #ff4444; }
+        .btn-regreso { background: #ffffff; color: #000000; border: 2px solid var(--verde); }
         
         h3 { 
             color: var(--verde); 
@@ -142,8 +143,9 @@
                 <option value="Popeyes">POPEYES 🍗</option>
             </select>
 
-            <button class="btn-entrar" onclick="enviar('llegue')">ENTRAR EN FILA</button>
-            <button class="btn-salir" onclick="enviar('salgo')">SALIR A REPARTO</button>
+            <button class="btn-entrar" onclick="enviar('llegue', this)">ENTRAR EN FILA</button>
+            <button class="btn-salir" onclick="enviar('salgo', this)">SALIR A REPARTO</button>
+            <button class="btn-regreso" onclick="enviar('regreso', this)">REGRESAR A BASE</button>
         </div>
 
         <div class="card">
@@ -185,10 +187,9 @@
             }
         }
 
-        async function enviar(accion) {
+        async function enviar(accion, btn) {
             const nombre = document.getElementById('repartidor').value;
             const fila = document.getElementById('fila_destino').value;
-            const btn = event.target;
             const originalText = btn.innerText;
             
             btn.innerText = "PROCESANDO...";
